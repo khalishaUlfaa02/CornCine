@@ -1,6 +1,6 @@
 # 🎬 CornCine - Sistem Penjualan dan Manajemen Tiket Bioskop Berbasis Web
 
-> **Projek Akhir Java Lanjutan (Program Sarjana S1)**  
+> **Projek Akhir Java Lanjutan**  
 > Platform pemesanan tiket bioskop online dan manajemen bioskop terdistribusi yang dibangun dengan arsitektur **Microservices (Spring Boot)**, autentikasi **Stateless JWT**, database **PostgreSQL**, dan antarmuka responsif **React.js**.
 
 ---
