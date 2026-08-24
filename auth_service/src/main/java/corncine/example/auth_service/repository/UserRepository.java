@@ -2,8 +2,8 @@ package corncine.example.auth_service.repository;
 
 import corncine.example.auth_service.entity.UserEntity;
 
-import org.springframework.boot.data.autoconfigure.web.DataWebProperties.Pageable;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 

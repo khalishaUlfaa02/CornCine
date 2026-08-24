@@ -1,6 +1,7 @@
 package corncine.example.auth_service.payload.res;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.NoArgsConstructor;
 import lombok.Data;
 import java.time.LocalDate;
@@ -8,6 +9,7 @@ import java.time.LocalDate;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class UserProfileRes {
     private Integer userId;
     private String username;
