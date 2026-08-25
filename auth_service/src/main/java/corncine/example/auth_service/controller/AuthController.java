@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import corncine.example.auth_service.payload.req.ForgotPasswordReq;
 import corncine.example.auth_service.payload.req.LoginReq;
 import corncine.example.auth_service.payload.req.RegisterReq;
@@ -15,11 +14,13 @@ import corncine.example.auth_service.payload.res.JwtRes;
 import corncine.example.auth_service.service.AuthService;
 import corncine.example.auth_service.utility.Message;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/auth")
+@RequiredArgsConstructor
 public class AuthController {
-    private AuthService authService;
+    private final AuthService authService;
 
     @PostMapping("/login")
     public ResponseEntity<Message> login(@Valid @RequestBody LoginReq req) {

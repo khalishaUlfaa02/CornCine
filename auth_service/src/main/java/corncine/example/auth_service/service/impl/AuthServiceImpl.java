@@ -3,6 +3,7 @@ package corncine.example.auth_service.service.impl;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,19 +18,32 @@ import corncine.example.auth_service.utility.JwtUtil;
 import jakarta.transaction.Transactional;
 
 @Service
-public class AuthServiceImpl implements AuthService{
+public class AuthServiceImpl implements AuthService {
+    @Autowired
     private UserRepository userRepository;
+
+    @Autowired
     private RoleRepository roleRepository;
+
+    @Autowired
     private UserProfileRepository userProfileRepository;
+
+    @Autowired
     private PasswordResetRepository passwordResetRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
     private JwtUtil jwtUtil;
+
+    @Autowired
     private JavaMailSender mailSender;
 
     @Override
-    public JwtRes login(LoginReq req){
+    public JwtRes login(LoginReq req) {
         UserEntity user = userRepository.findByUsernameAndDeletedFalse(req.getUsername())
-            .orElseThrow(() -> new RuntimeException("Username atau password salah."));
+                .orElseThrow(() -> new RuntimeException("Username atau password salah."));
 
         if (!"ACTIVE".equalsIgnoreCase(user.getStatus())) {
             throw new RuntimeException("Akun Anda sedang dinonaktifkan. Hubungi Administrator.");
@@ -42,22 +56,23 @@ public class AuthServiceImpl implements AuthService{
         UserProfileEntity profile = userProfileRepository.findByUser_UserId(user.getUserId()).orElse(null);
 
         String fullName = (profile != null) ? profile.getFullName() : user.getUsername();
-        String token = jwtUtil.generateToken(user.getUserId(), user.getUsername(), user.getEmail(), user.getRole().getRoleCode());
+        String token = jwtUtil.generateToken(user.getUserId(), user.getUsername(), user.getEmail(),
+                user.getRole().getRoleCode());
 
         return JwtRes.builder()
-            .token(token)
-            .tokenType("Bearer")
-            .userId(user.getUserId())
-            .username(user.getUsername())
-            .fullName(fullName)
-            .email(user.getEmail())
-            .role(user.getRole().getRoleCode())
-            .build();
+                .token(token)
+                .tokenType("Bearer")
+                .userId(user.getUserId())
+                .username(user.getUsername())
+                .fullName(fullName)
+                .email(user.getEmail())
+                .role(user.getRole().getRoleCode())
+                .build();
     }
 
     @Override
     @Transactional
-    public void register(RegisterReq req){
+    public void register(RegisterReq req) {
         if (userRepository.existsByUsername(req.getUsername())) {
             throw new RuntimeException("Username sudah terdaftar.");
         }
@@ -66,14 +81,19 @@ public class AuthServiceImpl implements AuthService{
             throw new RuntimeException("Email sudah digunakan.");
         }
 
-        RoleEntity customerRole = roleRepository.findByRoleCode("CUSTOMER")
-                .orElseThrow(() -> new ResourceNotFoundException("Role CUSTOMER tidak ditemukan di database."));
+        String targetRole = (req.getRole() != null && !req.getRole().isBlank())
+            ? req.getRole().toUpperCase()
+            : "CUSTOMER";
+
+        RoleEntity userRole = roleRepository.findByRoleCode(targetRole)
+            .orElseThrow(
+                () -> new ResourceNotFoundException("Role " + targetRole + " tidak ditemukan di database."));
 
         UserEntity user = UserEntity.builder()
             .username(req.getUsername())
             .password(passwordEncoder.encode(req.getPassword()))
             .email(req.getEmail())
-            .role(customerRole)
+            .role(userRole) // Menggunakan role yang dipilih
             .status("ACTIVE")
             .deleted(false)
             .build();
@@ -81,10 +101,10 @@ public class AuthServiceImpl implements AuthService{
         UserEntity savedUser = userRepository.save(user);
 
         UserProfileEntity profile = UserProfileEntity.builder()
-            .user(savedUser)
-            .fullName(req.getFullName())
-            .phoneNumber(req.getPhoneNumber())
-            .build();
+                .user(savedUser)
+                .fullName(req.getFullName())
+                .phoneNumber(req.getPhoneNumber())
+                .build();
 
         userProfileRepository.save(profile);
     }
@@ -98,11 +118,11 @@ public class AuthServiceImpl implements AuthService{
         String token = UUID.randomUUID().toString();
 
         PasswordResetEntity resetEntity = PasswordResetEntity.builder()
-            .email(user.getEmail())
-            .token(token)
-            .expiryDate(LocalDateTime.now().plusMinutes(15)) // Berlaku 15 menit
-            .isUsed(false)
-            .build();
+                .email(user.getEmail())
+                .token(token)
+                .expiryDate(LocalDateTime.now().plusMinutes(15)) // Berlaku 15 menit
+                .isUsed(false)
+                .build();
 
         passwordResetRepository.save(resetEntity);
 
@@ -112,7 +132,8 @@ public class AuthServiceImpl implements AuthService{
                 SimpleMailMessage message = new SimpleMailMessage();
                 message.setTo(user.getEmail());
                 message.setSubject("CornCine - Reset Password Token");
-                message.setText("Gunakan token berikut untuk mereset kata sandi Anda: " + token + "\nToken ini berlaku selama 15 menit.");
+                message.setText("Gunakan token berikut untuk mereset kata sandi Anda: " + token
+                        + "\nToken ini berlaku selama 15 menit.");
                 mailSender.send(message);
             } catch (Exception e) {
                 System.err.println("Gagal mengirim email: " + e.getMessage());
@@ -131,7 +152,7 @@ public class AuthServiceImpl implements AuthService{
         }
 
         UserEntity user = userRepository.findByEmailAndDeletedFalse(resetEntity.getEmail())
-            .orElseThrow(() -> new ResourceNotFoundException("User tidak ditemukan."));
+                .orElseThrow(() -> new ResourceNotFoundException("User tidak ditemukan."));
 
         user.setPassword(passwordEncoder.encode(req.getNewPassword()));
         userRepository.save(user);
@@ -140,4 +161,3 @@ public class AuthServiceImpl implements AuthService{
         passwordResetRepository.save(resetEntity);
     }
 }
-

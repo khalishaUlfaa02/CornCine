@@ -1,9 +1,12 @@
 package corncine.example.auth_service.controller;
 
 import org.springframework.web.bind.annotation.RestController;
+
+import corncine.example.auth_service.payload.req.CreateStaffReq;
 import corncine.example.auth_service.payload.res.UserProfileRes;
 import corncine.example.auth_service.service.UserService;
 import corncine.example.auth_service.utility.Message;
+import jakarta.validation.Valid;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,12 +20,16 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @RestController
 @RequestMapping("/users")
 public class UserController {
+    @Autowired
     private UserService userService;
 
     // Akses: Semua User yang telah terotentikasi (CUSTOMER, STAFF, ADMIN)
@@ -62,5 +69,14 @@ public class UserController {
     public ResponseEntity<Message> softDelete(@PathVariable Integer userId, Authentication authentication) {
         userService.softDeleteUser(userId, authentication.getName());
         return new ResponseEntity<>(Message.success("User berhasil dihapus (Soft Delete)", null), HttpStatus.OK);
+    }
+
+    // Akses: HANYA ADMIN YANG DAPAT MEMBUAT AKUN STAFF
+    @PostMapping("/staff")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Message> createStaff(@Valid @RequestBody CreateStaffReq req) {
+        userService.createStaff(req);
+        return new ResponseEntity<>(Message.success("Akun Staff berhasil dibuat oleh Administrator.", null),
+            HttpStatus.CREATED);
     }
 }
