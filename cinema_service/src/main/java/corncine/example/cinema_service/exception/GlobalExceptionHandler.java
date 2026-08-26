@@ -1,4 +1,4 @@
-package corncine.example.auth_service.exception;
+package corncine.example.cinema_service.exception;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,7 +10,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import corncine.example.auth_service.utility.Message;
+import corncine.example.cinema_service.utility.Message;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {

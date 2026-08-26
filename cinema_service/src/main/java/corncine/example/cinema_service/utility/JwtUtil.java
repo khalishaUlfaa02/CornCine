@@ -1,4 +1,4 @@
-package corncine.example.auth_service.utility;
+package corncine.example.cinema_service.utility;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
