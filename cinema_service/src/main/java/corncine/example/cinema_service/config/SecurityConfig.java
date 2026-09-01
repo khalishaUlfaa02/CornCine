@@ -27,7 +27,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers(HttpMethod.GET, "/movies/**", "/cinemas/**", "/schedules/**", "/files/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/movies/**", "/cinemas/**", "/schedules/**", "/studios/**", "/seats/**", "/genres/**", "/files/**").permitAll()
                 .anyRequest().authenticated()
             )
             .exceptionHandling(ex -> ex
