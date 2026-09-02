@@ -7,6 +7,7 @@ import corncine.example.cinema_service.payload.res.SeatRes;
 public interface SeatService {
     List<SeatRes> getSeatsByStudioId(Integer studioId);
     void createSeat(SeatReq req);
+    void updateSeat(Integer seatId, SeatReq req);
     void generateSeatsForStudio(Integer studioId, Integer rows, Integer seatsPerRow, String seatType);
     void deleteSeat(Integer seatId);
 }

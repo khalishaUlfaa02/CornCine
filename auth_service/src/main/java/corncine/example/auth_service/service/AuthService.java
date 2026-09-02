@@ -11,4 +11,6 @@ public interface AuthService {
     void register(RegisterReq req);
     void forgotPassword(ForgotPasswordReq req);
     void resetPassword(ResetPasswordReq req);
+    void logout(String token);
+    JwtRes refreshToken(String token);
 }

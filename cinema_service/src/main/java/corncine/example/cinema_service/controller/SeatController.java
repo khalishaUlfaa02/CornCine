@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -39,6 +40,13 @@ public class SeatController {
     public ResponseEntity<Message> createSeat(@Valid @RequestBody SeatReq req) {
         seatService.createSeat(req);
         return new ResponseEntity<>(Message.success("Kursi baru berhasil ditambahkan.", null), HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{seatId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Message> updateSeat(@PathVariable Integer seatId, @Valid @RequestBody SeatReq req) {
+        seatService.updateSeat(seatId, req);
+        return new ResponseEntity<>(Message.success("Kursi berhasil diperbarui.", null), HttpStatus.OK);
     }
 
     @PostMapping("/generate/{studioId}")

@@ -1,7 +1,7 @@
 package corncine.example.cinema_service.controller;
 
-import corncine.example.cinema_service.service.impl.ExcelExportServiceImpl;
-import corncine.example.cinema_service.service.impl.ExcelImportServiceImpl;
+import corncine.example.cinema_service.service.ExcelExportService;
+import corncine.example.cinema_service.service.ExcelImportService;
 import corncine.example.cinema_service.utility.Message;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.InputStreamResource;
@@ -20,8 +20,8 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class ExcelController {
 
-    private final ExcelExportServiceImpl excelExportService;
-    private final ExcelImportServiceImpl excelImportService;
+    private final ExcelExportService excelExportService;
+    private final ExcelImportService excelImportService;
 
     // Akses: ADMIN & STAFF dapat mengunduh laporan Excel
     @GetMapping("/export")

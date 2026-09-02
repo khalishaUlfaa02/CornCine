@@ -3,7 +3,9 @@ package corncine.example.cinema_service.service.impl;
 import corncine.example.cinema_service.entity.GenreEntity;
 import corncine.example.cinema_service.entity.MovieEntity;
 import corncine.example.cinema_service.repository.MovieRepository;
+import corncine.example.cinema_service.service.ExcelExportService;
 import lombok.RequiredArgsConstructor;
+
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
@@ -16,9 +18,10 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class ExcelExportServiceImpl {
+public class ExcelExportServiceImpl implements ExcelExportService {
     private final MovieRepository movieRepository;
 
+    @Override
     public ByteArrayInputStream exportMoviesToExcel() throws IOException {
         String[] columns = {"ID Film", "Judul", "Durasi (Menit)", "Batasan Umur", "Tanggal Rilis", "Genre"};
 

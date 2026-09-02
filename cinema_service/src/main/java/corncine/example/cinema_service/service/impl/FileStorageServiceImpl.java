@@ -31,6 +31,11 @@ public class FileStorageServiceImpl implements FileStorageService{
 
     @Override
     public String storeFile(MultipartFile file) {
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            throw new RuntimeException("Hanya file gambar (image/*) yang diperbolehkan.");
+        }
+
         String originalFileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
         String fileExtension = "";
         

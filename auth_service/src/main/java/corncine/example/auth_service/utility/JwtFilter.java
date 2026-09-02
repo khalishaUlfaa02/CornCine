@@ -1,5 +1,6 @@
 package corncine.example.auth_service.utility;
 
+import corncine.example.auth_service.repository.TokenBlacklistRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,6 +21,7 @@ import java.util.List;
 public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
+    private final TokenBlacklistRepository tokenBlacklistRepository;
 
     @Override
     protected void doFilterInternal(
@@ -34,7 +36,7 @@ public class JwtFilter extends OncePerRequestFilter {
             String token = authHeader.substring(7);
 
             // Memanggil method isTokenValid milik JwtUtil
-            if (jwtUtil.isTokenValid(token)) {
+            if (jwtUtil.isTokenValid(token) && !tokenBlacklistRepository.existsByToken(token)) {
                 String username = jwtUtil.extractUsername(token);
                 String role = jwtUtil.extractRole(token);
 

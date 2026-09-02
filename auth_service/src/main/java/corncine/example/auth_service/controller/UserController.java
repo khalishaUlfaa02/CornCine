@@ -2,7 +2,9 @@ package corncine.example.auth_service.controller;
 
 import org.springframework.web.bind.annotation.RestController;
 
+import corncine.example.auth_service.payload.req.ChangePasswordReq;
 import corncine.example.auth_service.payload.req.CreateStaffReq;
+import corncine.example.auth_service.payload.req.UpdateProfileReq;
 import corncine.example.auth_service.payload.res.UserProfileRes;
 import corncine.example.auth_service.service.UserService;
 import corncine.example.auth_service.utility.Message;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -37,6 +40,20 @@ public class UserController {
     public ResponseEntity<Message> getProfile(Authentication authentication) {
         UserProfileRes profile = userService.getMyProfile(authentication.getName());
         return new ResponseEntity<>(Message.success("Data profil berhasil diambil", profile), HttpStatus.OK);
+    }
+
+    @PutMapping("/profile")
+    public ResponseEntity<Message> updateProfile(Authentication authentication,
+                                                  @Valid @RequestBody UpdateProfileReq req) {
+        UserProfileRes profile = userService.updateMyProfile(authentication.getName(), req);
+        return new ResponseEntity<>(Message.success("Profil berhasil diperbarui", profile), HttpStatus.OK);
+    }
+
+    @PatchMapping("/change-password")
+    public ResponseEntity<Message> changePassword(Authentication authentication,
+                                                   @Valid @RequestBody ChangePasswordReq req) {
+        userService.changePassword(authentication.getName(), req);
+        return new ResponseEntity<>(Message.success("Password berhasil diubah", null), HttpStatus.OK);
     }
 
     // Akses: Hanya ADMIN

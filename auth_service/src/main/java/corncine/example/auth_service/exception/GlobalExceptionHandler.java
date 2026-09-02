@@ -22,8 +22,8 @@ public class GlobalExceptionHandler {
         }
 
         Map<String, Object> response = new HashMap<>();
-        response.put("status", false);
-        response.put("status", HttpStatus.UNPROCESSABLE_ENTITY.value());
+        response.put("success", false);
+        response.put("statusCode", HttpStatus.UNPROCESSABLE_ENTITY.value());
         response.put("message", "Validasi Form Gagal");
         response.put("errors", errors);
 

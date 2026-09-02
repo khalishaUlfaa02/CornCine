@@ -4,7 +4,9 @@ import corncine.example.auth_service.entity.RoleEntity;
 import corncine.example.auth_service.entity.UserEntity;
 import corncine.example.auth_service.entity.UserProfileEntity;
 import corncine.example.auth_service.exception.ResourceNotFoundException;
+import corncine.example.auth_service.payload.req.ChangePasswordReq;
 import corncine.example.auth_service.payload.req.CreateStaffReq;
+import corncine.example.auth_service.payload.req.UpdateProfileReq;
 import corncine.example.auth_service.payload.res.UserProfileRes;
 import corncine.example.auth_service.repository.RoleRepository;
 import corncine.example.auth_service.repository.UserProfileRepository;
@@ -43,6 +45,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public UserProfileRes getMyProfile(String username) {
         UserEntity user = userRepository.findByUsernameAndDeletedFalse(username)
                 .orElseThrow(() -> new ResourceNotFoundException("User tidak ditemukan."));
@@ -51,6 +54,46 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
+    public UserProfileRes updateMyProfile(String username, UpdateProfileReq req) {
+        UserEntity user = userRepository.findByUsernameAndDeletedFalse(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User tidak ditemukan."));
+
+        UserProfileEntity profile = userProfileRepository.findByUser_UserId(user.getUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("Profil user tidak ditemukan."));
+
+        if (req.getFullName() != null) profile.setFullName(req.getFullName());
+        if (req.getPhoneNumber() != null) profile.setPhoneNumber(req.getPhoneNumber());
+        if (req.getIdentityCardNumber() != null) profile.setIdentityCardNumber(req.getIdentityCardNumber());
+        if (req.getBirthDate() != null) profile.setBirthDate(req.getBirthDate());
+        if (req.getGender() != null) profile.setGender(req.getGender());
+        if (req.getAddress() != null) profile.setAddress(req.getAddress());
+        if (req.getAvatarUrl() != null) profile.setAvatarUrl(req.getAvatarUrl());
+
+        userProfileRepository.save(profile);
+        return mapToRes(user, profile);
+    }
+
+    @Override
+    @Transactional
+    public void changePassword(String username, ChangePasswordReq req) {
+        UserEntity user = userRepository.findByUsernameAndDeletedFalse(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User tidak ditemukan."));
+
+        if (!passwordEncoder.matches(req.getOldPassword(), user.getPassword())) {
+            throw new RuntimeException("Password lama tidak sesuai.");
+        }
+
+        if (req.getOldPassword().equals(req.getNewPassword())) {
+            throw new RuntimeException("Password baru tidak boleh sama dengan password lama.");
+        }
+
+        user.setPassword(passwordEncoder.encode(req.getNewPassword()));
+        userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
     public Page<UserProfileRes> getAllUsers(Pageable pageable) {
         return userRepository.findByDeletedFalse(pageable)
                 .map(user -> {

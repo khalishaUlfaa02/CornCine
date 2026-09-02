@@ -1,6 +1,7 @@
 package corncine.example.cinema_service.service.impl;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -78,12 +79,22 @@ public class ScheduleServiceImpl implements ScheduleService {
         StudioEntity studio = studioRepository.findById(req.getStudioId())
                 .orElseThrow(() -> new ResourceNotFoundException("Studio tidak ditemukan dengan ID: " + req.getStudioId()));
 
+        LocalTime endTime = req.getStartTime().plusMinutes(movie.getDurationMinutes());
+
+        // Validasi konflik jadwal
+        List<ScheduleEntity> conflicts = scheduleRepository.findConflictingSchedules(
+                studio.getStudioId(), req.getShowDate(), req.getStartTime(), endTime);
+        
+        if (!conflicts.isEmpty()) {
+            throw new RuntimeException("Terdapat konflik jadwal pada studio dan waktu tersebut.");
+        }
+
         ScheduleEntity schedule = ScheduleEntity.builder()
                 .movie(movie)
                 .studio(studio)
                 .showDate(req.getShowDate())
                 .startTime(req.getStartTime())
-                .endTime(req.getStartTime().plusMinutes(movie.getDurationMinutes()))
+                .endTime(endTime)
                 .price(req.getPrice())
                 .build();
 
@@ -103,11 +114,22 @@ public class ScheduleServiceImpl implements ScheduleService {
         StudioEntity studio = studioRepository.findById(req.getStudioId())
                 .orElseThrow(() -> new ResourceNotFoundException("Studio tidak ditemukan dengan ID: " + req.getStudioId()));
 
+        LocalTime endTime = req.getStartTime().plusMinutes(movie.getDurationMinutes());
+
+        // Validasi konflik jadwal, kecualikan jadwal yang sedang diupdate
+        List<ScheduleEntity> conflicts = scheduleRepository.findConflictingSchedules(
+                studio.getStudioId(), req.getShowDate(), req.getStartTime(), endTime);
+        
+        boolean hasConflict = conflicts.stream().anyMatch(c -> !c.getScheduleId().equals(scheduleId));
+        if (hasConflict) {
+            throw new RuntimeException("Terdapat konflik jadwal pada studio dan waktu tersebut.");
+        }
+
         schedule.setMovie(movie);
         schedule.setStudio(studio);
         schedule.setShowDate(req.getShowDate());
         schedule.setStartTime(req.getStartTime());
-        schedule.setEndTime(req.getStartTime().plusMinutes(movie.getDurationMinutes()));
+        schedule.setEndTime(endTime);
         schedule.setPrice(req.getPrice());
 
         scheduleRepository.save(schedule);

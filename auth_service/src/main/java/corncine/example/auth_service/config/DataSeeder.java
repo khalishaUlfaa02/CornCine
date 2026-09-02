@@ -10,9 +10,11 @@ import corncine.example.auth_service.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class DataSeeder implements CommandLineRunner {
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
@@ -54,7 +56,7 @@ public class DataSeeder implements CommandLineRunner {
                     .build();
 
             userProfileRepository.save(adminProfile);
-            System.out.println(">>> SEEDER: Akun Admin Default Berhasil Dibuat (admin / password123)");
+            log.info(">>> SEEDER: Akun Admin Default Berhasil Dibuat (admin / password123)");
         }
     }
 }

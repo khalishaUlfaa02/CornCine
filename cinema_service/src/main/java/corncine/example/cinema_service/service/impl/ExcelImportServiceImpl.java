@@ -1,5 +1,6 @@
 package corncine.example.cinema_service.service.impl;
 
+import corncine.example.cinema_service.service.ExcelImportService;
 import corncine.example.cinema_service.entity.MovieEntity;
 import corncine.example.cinema_service.repository.MovieRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,10 +18,11 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class ExcelImportServiceImpl {
+public class ExcelImportServiceImpl implements ExcelImportService {
 
     private final MovieRepository movieRepository;
 
+    @Override
     @Transactional
     public void importMoviesFromExcel(MultipartFile file) {
         try (InputStream is = file.getInputStream(); Workbook workbook = new XSSFWorkbook(is)) {

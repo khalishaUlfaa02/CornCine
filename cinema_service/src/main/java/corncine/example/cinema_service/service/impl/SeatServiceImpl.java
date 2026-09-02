@@ -65,6 +65,26 @@ public class SeatServiceImpl implements SeatService {
 
     @Override
     @Transactional
+    public void updateSeat(Integer seatId, SeatReq req) {
+        SeatEntity seat = seatRepository.findById(seatId)
+                .orElseThrow(() -> new ResourceNotFoundException("Kursi tidak ditemukan dengan ID: " + seatId));
+
+        StudioEntity studio = studioRepository.findById(req.getStudioId())
+                .orElseThrow(() -> new ResourceNotFoundException("Studio tidak ditemukan dengan ID: " + req.getStudioId()));
+
+        String seatCode = req.getSeatRow() + req.getSeatNumber();
+
+        seat.setStudio(studio);
+        seat.setSeatRow(req.getSeatRow());
+        seat.setSeatNumber(req.getSeatNumber());
+        seat.setSeatCode(seatCode);
+        seat.setSeatType(req.getSeatType() != null ? req.getSeatType() : "REGULAR");
+
+        seatRepository.save(seat);
+    }
+
+    @Override
+    @Transactional
     public void generateSeatsForStudio(Integer studioId, Integer rows, Integer seatsPerRow, String seatType) {
         StudioEntity studio = studioRepository.findById(studioId)
                 .orElseThrow(() -> new ResourceNotFoundException("Studio tidak ditemukan dengan ID: " + studioId));

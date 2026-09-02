@@ -13,6 +13,7 @@ import corncine.example.auth_service.payload.req.ResetPasswordReq;
 import corncine.example.auth_service.payload.res.JwtRes;
 import corncine.example.auth_service.service.AuthService;
 import corncine.example.auth_service.utility.Message;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -44,5 +45,27 @@ public class AuthController {
     public ResponseEntity<Message> resetPassword(@Valid @RequestBody ResetPasswordReq req) {
         authService.resetPassword(req);
         return new ResponseEntity<>(Message.success("Kata sandi berhasil diperbarui, silakan login kembali.", null), HttpStatus.OK);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Message> logout(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new RuntimeException("Token tidak ditemukan.");
+        }
+        String token = authHeader.substring(7);
+        authService.logout(token);
+        return new ResponseEntity<>(Message.success("Logout berhasil.", null), HttpStatus.OK);
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<Message> refreshToken(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new RuntimeException("Token tidak ditemukan.");
+        }
+        String token = authHeader.substring(7);
+        JwtRes jwtRes = authService.refreshToken(token);
+        return new ResponseEntity<>(Message.success("Token berhasil diperbarui.", jwtRes), HttpStatus.OK);
     }
 }
