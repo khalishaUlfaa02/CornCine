@@ -34,6 +34,7 @@ public class ScheduleServiceImpl implements ScheduleService {
                 .scheduleId(schedule.getScheduleId())
                 .movieTitle(schedule.getMovie().getTitle())
                 .cinemaName(schedule.getStudio().getCinema().getName())
+                .studioId(schedule.getStudio().getStudioId())
                 .studioNumber(schedule.getStudio().getStudioNumber())
                 .studioType(schedule.getStudio().getStudioType())
                 .showDate(schedule.getShowDate())

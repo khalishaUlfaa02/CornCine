@@ -16,6 +16,7 @@ public class ScheduleRes {
     private Integer scheduleId;
     private String movieTitle;
     private String cinemaName;
+    private Integer studioId;
     private Integer studioNumber;
     private String studioType;
     private LocalDate showDate;
