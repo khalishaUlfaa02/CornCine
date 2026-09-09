@@ -25,6 +25,11 @@ export const createBooking = async (scheduleId, seatIds) => {
   return response.data;
 };
 
+export const createPaymentInvoice = async (bookingData) => {
+  const response = await axiosClient.post('/api/payments/create-invoice', bookingData);
+  return response.data;
+};
+
 export const simulatePayment = async (bookingCode, paymentMethod) => {
   const response = await axiosClient.post('/tickets/payments/simulate', {
     bookingCode,

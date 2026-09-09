@@ -40,7 +40,7 @@ public class MovieEntity {
     @Column(name = "synopsis", columnDefinition = "TEXT")
     private String synopsis;
 
-    @Column(name = "duration_minutes", nullable = false)
+    @Column(name = "duration", nullable = false)
     private Integer durationMinutes;
 
     @Column(name = "poster_url", length = 500)
@@ -54,6 +54,12 @@ public class MovieEntity {
 
     @Column(name = "age_rating", length = 10)
     private String ageRating;
+
+    @Column(name = "director", length = 100)
+    private String director;
+
+    @Column(name = "cast_members", length = 255)
+    private String castMembers;
 
     @Column(name = "deleted", nullable = false)
     private Boolean deleted;

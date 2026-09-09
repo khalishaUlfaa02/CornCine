@@ -20,5 +20,7 @@ public class MovieRes {
     private String trailerUrl;
     private LocalDate releaseDate;
     private String ageRating;
+    private String director;
+    private String castMembers;
     private List<String> genres;
 }

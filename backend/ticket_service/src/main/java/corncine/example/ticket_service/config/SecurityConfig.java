@@ -26,7 +26,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.GET, "/tickets/schedules/*/occupied-seats").permitAll()
                         .requestMatchers("/tickets/midtrans/webhook").permitAll()
-                        .requestMatchers("/tickets/**/pdf").permitAll()
+                        .requestMatchers("/api/webhooks/xendit").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/tickets/*/pdf").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

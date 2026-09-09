@@ -19,6 +19,47 @@
           "ignoreFailures": true
         }
       ]
+    },
+    {
+      "type": "java",
+      "name": "Spring Boot-CinemaServiceApplication<cinema_service>",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "mainClass": "corncine.example.cinema_service.CinemaServiceApplication",
+      "projectName": "cinema_service",
+      "args": "",
+      "envFile": "${workspaceFolder}/.env",
+      "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=50495 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=cinema_service"
+    },
+    {
+      "type": "java",
+      "name": "Spring Boot-GatewayServiceApplication<api_gateway>",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "mainClass": "corncine.example.gateway_service.GatewayServiceApplication",
+      "projectName": "api_gateway",
+      "args": "",
+      "envFile": "${workspaceFolder}/.env"
+    },
+    {
+      "type": "java",
+      "name": "Spring Boot-AuthServiceApplication<auth_service>",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "mainClass": "corncine.example.auth_service.AuthServiceApplication",
+      "projectName": "auth_service",
+      "args": "",
+      "envFile": "${workspaceFolder}/.env"
+    },
+    {
+      "type": "java",
+      "name": "Spring Boot-TicketServiceApplication<ticket_service>",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "mainClass": "corncine.example.ticket_service.TicketServiceApplication",
+      "projectName": "ticket_service",
+      "args": "",
+      "envFile": "${workspaceFolder}/.env"
     }
   ]
 }

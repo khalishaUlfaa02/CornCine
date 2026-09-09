@@ -2,8 +2,6 @@ package corncine.example.cinema_service.utility;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
-import java.util.HashMap;
-import java.util.Map;   
 import java.util.Date;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -50,6 +48,7 @@ public class JwtUtil {
             Claims claims = extractAllClaims(token);
             return !claims.getExpiration().before(new Date());
         } catch (Exception e) {
+            System.err.println("JWT Validation Error: " + e.getMessage());
             return false;
         }
     }
