@@ -39,13 +39,28 @@ public class MovieServiceImpl implements MovieService{
                 .trailerUrl(movie.getTrailerUrl())
                 .releaseDate(movie.getReleaseDate())
                 .ageRating(movie.getAgeRating())
+                .director(movie.getDirector())
+                .castMembers(movie.getCastMembers())
                 .genres(genreNames)
                 .build();
     }
 
     @Override
     public Page<MovieRes> getAllMovies(String search, Pageable pageable) {
-        return movieRepository.searchMovies(search, pageable).map(this::mapToRes);
+        Page<MovieEntity> movies = movieRepository.findByDeletedFalse(pageable);
+        // Jika ada filter search, kita lakukan filter secara manual di memori (agar terhindar dari tipe data bytea PostgreSQL)
+        if (search != null && !search.trim().isEmpty()) {
+            String keyword = search.toLowerCase();
+            List<MovieEntity> filteredList = movies.getContent().stream()
+                    .filter(m -> m.getTitle().toLowerCase().contains(keyword))
+                    .collect(Collectors.toList());
+            return new org.springframework.data.domain.PageImpl<>(
+                    filteredList.stream().map(this::mapToRes).collect(Collectors.toList()),
+                    pageable,
+                    filteredList.size()
+            );
+        }
+        return movies.map(this::mapToRes);
     }
 
     @Override
@@ -69,6 +84,8 @@ public class MovieServiceImpl implements MovieService{
                 .trailerUrl(req.getTrailerUrl())
                 .releaseDate(req.getReleaseDate())
                 .ageRating(req.getAgeRating())
+                .director(req.getDirector())
+                .castMembers(req.getCastMembers())
                 .genres(genres)
                 .deleted(false)
                 .build();
@@ -92,6 +109,8 @@ public class MovieServiceImpl implements MovieService{
         movie.setTrailerUrl(req.getTrailerUrl());
         movie.setReleaseDate(req.getReleaseDate());
         movie.setAgeRating(req.getAgeRating());
+        movie.setDirector(req.getDirector());
+        movie.setCastMembers(req.getCastMembers());
         movie.setGenres(genres);
 
         movieRepository.save(movie);

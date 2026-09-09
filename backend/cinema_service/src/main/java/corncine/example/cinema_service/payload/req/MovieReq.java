@@ -23,6 +23,8 @@ public class MovieReq {
     private String trailerUrl;
     private LocalDate releaseDate;
     private String ageRating;
+    private String director;
+    private String castMembers;
 
     @NotEmpty(message = "Minimal cantumkan 1 genre")
     private List<Integer> genreIds;

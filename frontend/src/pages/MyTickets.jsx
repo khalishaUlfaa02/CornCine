@@ -87,7 +87,7 @@ const MyTickets = () => {
   if (loading) {
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-cine-baby border-t-transparent mb-4"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-cine-brand border-t-transparent mb-4"></div>
         <p className="text-cine-muted font-medium animate-pulse">Memuat riwayat tiket...</p>
       </div>
     );
@@ -97,7 +97,7 @@ const MyTickets = () => {
     <div className="container mx-auto px-4 py-12">
       <h1 className="text-3xl font-extrabold text-white mb-8 flex items-center">
         Tiket Saya
-        <span className="ml-3 h-1 w-12 bg-cine-baby rounded-full inline-block" />
+        <span className="ml-3 h-1 w-12 bg-cine-brand rounded-full inline-block" />
       </h1>
 
       {successMsg && (
@@ -123,7 +123,7 @@ const MyTickets = () => {
           </p>
           <Link 
             to="/" 
-            className="bg-cine-baby text-cine-dark font-bold px-8 py-3.5 rounded-xl hover:bg-cine-baby-hover shadow-[0_0_15px_rgba(125,211,252,0.3)] transition-all duration-300"
+            className="bg-cine-brand text-cine-bg font-bold px-8 py-3.5 rounded-xl hover:bg-cine-brand-hover shadow-[0_0_15px_rgba(125,211,252,0.3)] transition-all duration-300"
           >
             Cari Film Sekarang
           </Link>
@@ -143,7 +143,7 @@ const MyTickets = () => {
                 </div>
                 
                 <div className="space-y-2 mb-2">
-                  <p className="text-sm font-medium text-cine-baby-soft">
+                  <p className="text-sm font-medium text-amber-200">
                     {booking.cinemaName} <span className="text-cine-muted mx-1">•</span> Studio {booking.studioNumber}
                   </p>
                   <p className="text-sm text-slate-300">
@@ -157,9 +157,9 @@ const MyTickets = () => {
 
               {/* Dashed Divider Line */}
               <div className="relative flex items-center px-4">
-                <div className="w-4 h-8 bg-cine-dark rounded-full -ml-6 absolute z-10 border-r border-cine-border" />
+                <div className="w-4 h-8 bg-cine-bg rounded-full -ml-6 absolute z-10 border-r border-cine-border" />
                 <div className="w-full border-t-2 border-dashed border-cine-border" />
-                <div className="w-4 h-8 bg-cine-dark rounded-full -mr-6 absolute right-0 z-10 border-l border-cine-border" />
+                <div className="w-4 h-8 bg-cine-bg rounded-full -mr-6 absolute right-0 z-10 border-l border-cine-border" />
               </div>
 
               {/* Footer Card / Payment Info & Actions */}
@@ -171,7 +171,7 @@ const MyTickets = () => {
                 
                 <div className="text-left sm:text-right">
                   <p className="text-xs text-cine-muted mb-1">Total Pembayaran</p>
-                  <p className="text-lg font-extrabold text-cine-baby">{formatPrice(booking.totalAmount)}</p>
+                  <p className="text-lg font-extrabold text-cine-brand">{formatPrice(booking.totalAmount)}</p>
                 </div>
               </div>
 
@@ -183,8 +183,8 @@ const MyTickets = () => {
                     disabled={downloadingId === booking.bookingCode}
                     className={`w-full flex items-center justify-center gap-2 font-semibold py-3 rounded-xl transition-all duration-300 ${
                       downloadingId === booking.bookingCode
-                        ? 'bg-cine-baby/50 text-cine-dark cursor-wait'
-                        : 'bg-cine-baby text-cine-dark hover:bg-cine-baby-hover shadow-[0_0_15px_rgba(125,211,252,0.2)] hover:shadow-[0_0_20px_rgba(56,189,248,0.4)]'
+                        ? 'bg-cine-brand/50 text-cine-bg cursor-wait'
+                        : 'bg-cine-brand text-cine-bg hover:bg-cine-brand-hover shadow-[0_0_15px_rgba(125,211,252,0.2)] hover:shadow-[0_0_20px_rgba(56,189,248,0.4)]'
                     }`}
                   >
                     {downloadingId === booking.bookingCode ? (
