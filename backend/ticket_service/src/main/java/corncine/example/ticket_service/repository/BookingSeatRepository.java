@@ -18,4 +18,11 @@ public interface BookingSeatRepository extends JpaRepository<BookingSeatEntity, 
            "WHERE t.scheduleId = :scheduleId " +
            "AND t.paymentStatus IN ('PENDING', 'PAID')")
     List<UUID> findOccupiedSeatIdsBySchedule(@Param("scheduleId") UUID scheduleId);
+
+    @Query("SELECT bs.seatRef FROM BookingSeatEntity bs " +
+           "JOIN bs.transaction t " +
+           "WHERE t.scheduleRef = :scheduleRef " +
+           "AND bs.seatRef IS NOT NULL " +
+           "AND t.paymentStatus IN ('PENDING', 'PAID')")
+    List<String> findOccupiedSeatRefsByScheduleRef(@Param("scheduleRef") String scheduleRef);
 }

@@ -37,6 +37,7 @@ public class JwtUtil {
             extractAllClaims(token);
             return true;
         } catch (Exception e) {
+            System.err.println("JWT Validation Error di ticket_service: " + e.getMessage());
             return false;
         }
     }

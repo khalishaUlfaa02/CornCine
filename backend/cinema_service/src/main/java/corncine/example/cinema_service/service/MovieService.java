@@ -6,7 +6,7 @@ import corncine.example.cinema_service.payload.req.MovieReq;
 import corncine.example.cinema_service.payload.res.MovieRes;
 
 public interface MovieService {
-    Page<MovieRes> getAllMovies(String search, Pageable pageable);
+    Page<MovieRes> getAllMovies(String search, String genre, Pageable pageable);
     MovieRes getMovieById(Integer movieId);
     void createMovie(MovieReq req);
     void updateMovie(Integer movieId, MovieReq req);

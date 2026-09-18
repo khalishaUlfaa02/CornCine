@@ -25,6 +25,11 @@ public class BookingSeatEntity {
     
     @Column(name = "seat_id")
     private UUID seatId;
+
+    // Referensi kursi dari cinema_service (ID integer / kode seperti "C4").
+    // Alasan sama seperti scheduleRef: kolom UUID tidak bisa menyimpan "1".
+    @Column(name = "seat_ref")
+    private String seatRef;
     
     private Double price;
 }

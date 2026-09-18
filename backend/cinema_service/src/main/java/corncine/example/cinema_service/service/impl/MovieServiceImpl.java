@@ -44,8 +44,27 @@ public class MovieServiceImpl implements MovieService{
     }
 
     @Override
-    public Page<MovieRes> getAllMovies(String search, Pageable pageable) {
-        return movieRepository.searchMovies(search, pageable).map(this::mapToRes);
+    public Page<MovieRes> getAllMovies(String search, String genre, Pageable pageable) {
+        Page<MovieEntity> movies;
+        if (genre != null && !genre.trim().isEmpty()) {
+            movies = movieRepository.findDistinctByDeletedFalseAndGenres_GenreNameContainingIgnoreCase(
+                    genre.trim(), pageable);
+        } else {
+            movies = movieRepository.findByDeletedFalse(pageable);
+        }
+        // Jika ada filter search, kita lakukan filter secara manual di memori (agar terhindar dari tipe data bytea PostgreSQL)
+        if (search != null && !search.trim().isEmpty()) {
+            String keyword = search.toLowerCase();
+            List<MovieEntity> filteredList = movies.getContent().stream()
+                    .filter(m -> m.getTitle().toLowerCase().contains(keyword))
+                    .collect(Collectors.toList());
+            return new org.springframework.data.domain.PageImpl<>(
+                    filteredList.stream().map(this::mapToRes).collect(Collectors.toList()),
+                    pageable,
+                    filteredList.size()
+            );
+        }
+        return movies.map(this::mapToRes);
     }
 
     @Override

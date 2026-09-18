@@ -53,6 +53,8 @@ const MovieDetail = () => {
   const [selectedDate, setSelectedDate] = useState(dates[0]);
   const [selectedScheduleId, setSelectedScheduleId] = useState(null);
 
+  const isAdmin = user && (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN' || user.role === 'STAFF');
+
   useEffect(() => {
     const fetchMovie = async () => {
       setLoading(true);
@@ -117,7 +119,7 @@ const MovieDetail = () => {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-12 animate-pulse">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-32 pb-20 animate-pulse">
         <div className="flex flex-col lg:flex-row gap-10">
           <div className="w-full lg:w-80 aspect-[2/3] bg-cine-card rounded-2xl" />
           <div className="flex-grow space-y-4">
@@ -132,7 +134,7 @@ const MovieDetail = () => {
 
   if (!movie) {
     return (
-      <div className="container mx-auto px-4 py-24 text-center">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-32 pb-20 text-center">
         <h2 className="text-2xl font-bold text-cine-muted">Film tidak ditemukan</h2>
       </div>
     );
@@ -142,7 +144,7 @@ const MovieDetail = () => {
   const posterSrc = !movie.posterUrl || imgError ? FALLBACK_POSTER : movie.posterUrl;
 
   return (
-    <div className="container mx-auto px-4 py-12">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-32 pb-20">
       {/* Hero Section */}
       <div className="flex flex-col lg:flex-row gap-10 mb-14">
         {/* Poster */}
@@ -212,10 +214,17 @@ const MovieDetail = () => {
 
       {/* Schedule Section */}
       <div className="bg-cine-card rounded-2xl border border-cine-border p-6 lg:p-8">
-        <h2 className="text-2xl font-extrabold text-white mb-6 flex items-center">
-          Jadwal Tayang
-          <span className="ml-3 h-1 w-10 bg-cine-baby rounded-full inline-block" />
-        </h2>
+        <div className="flex items-center gap-4 mb-6">
+          <h2 className="text-2xl font-extrabold text-white flex items-center">
+            Jadwal Tayang
+            <span className="ml-3 h-1 w-10 bg-cine-baby rounded-full inline-block" />
+          </h2>
+          {isAdmin && (
+            <span className="bg-amber-500/10 text-amber-500 border border-amber-500/30 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-widest">
+              Mode Pratinjau Admin
+            </span>
+          )}
+        </div>
 
         {/* Date Selector */}
         <div className="flex gap-2 overflow-x-auto pb-4 mb-8 scrollbar-hide">
@@ -282,11 +291,14 @@ const MovieDetail = () => {
                     return (
                       <button
                         key={slot.scheduleId}
-                        onClick={() => setSelectedScheduleId(slot.scheduleId)}
+                        onClick={() => { if (!isAdmin) setSelectedScheduleId(slot.scheduleId); }}
+                        disabled={isAdmin}
                         className={`px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
                           isSelected
                             ? 'bg-cine-baby text-cine-dark border border-cine-baby shadow-md shadow-cine-baby/20'
-                            : 'border border-cine-border text-slate-300 hover:border-cine-baby hover:text-cine-baby'
+                            : isAdmin
+                              ? 'border border-cine-border text-slate-400 cursor-not-allowed opacity-70'
+                              : 'border border-cine-border text-slate-300 hover:border-cine-baby hover:text-cine-baby'
                         }`}
                       >
                         <span className="block">{timeLabel}</span>
@@ -302,19 +314,33 @@ const MovieDetail = () => {
           </div>
         )}
 
-        {/* CTA Button */}
+        {/* CTA Button / Admin shortcut */}
         <div className="mt-8 flex justify-end">
-          <button
-            onClick={handleSelectSchedule}
-            disabled={!selectedScheduleId}
-            className={`px-8 py-3.5 rounded-xl font-bold text-base transition-all duration-300 ${
-              selectedScheduleId
-                ? 'bg-cine-baby text-cine-dark hover:bg-cine-baby-hover shadow-[0_0_15px_rgba(125,211,252,0.3)] hover:shadow-[0_0_25px_rgba(56,189,248,0.5)] transform hover:-translate-y-0.5'
-                : 'bg-cine-border text-cine-muted cursor-not-allowed'
-            }`}
-          >
-            Lanjut Pilih Kursi →
-          </button>
+          {isAdmin ? (
+            <div className="flex items-center gap-4">
+              <span className="text-slate-400 font-medium text-sm italic">
+                *Mode Admin: Hanya untuk pratinjau katalog
+              </span>
+              <button
+                onClick={() => navigate('/admin/movies')}
+                className="bg-cine-border text-slate-200 font-bold px-8 py-3.5 rounded-xl hover:bg-slate-700 hover:text-white transition-all duration-300"
+              >
+                Kelola Film Ini
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={handleSelectSchedule}
+              disabled={!selectedScheduleId}
+              className={`px-8 py-3.5 rounded-xl font-bold text-base transition-all duration-300 ${
+                selectedScheduleId
+                  ? 'bg-cine-baby text-cine-dark hover:bg-cine-baby-hover shadow-[0_0_15px_rgba(125,211,252,0.3)] hover:shadow-[0_0_25px_rgba(56,189,248,0.5)] transform hover:-translate-y-0.5'
+                  : 'bg-cine-border text-cine-muted cursor-not-allowed'
+              }`}
+            >
+              Lanjut Pilih Kursi →
+            </button>
+          )}
         </div>
       </div>
     </div>

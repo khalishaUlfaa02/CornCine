@@ -112,6 +112,22 @@ public class AuthServiceImpl implements AuthService {
                 .build();
 
         userProfileRepository.save(profile);
+
+        // Kirim Welcome Email
+        if (mailSender != null) {
+            try {
+                SimpleMailMessage message = new SimpleMailMessage();
+                message.setTo(user.getEmail());
+                message.setSubject("Selamat Datang di CornCine!");
+                message.setText("Halo " + req.getFullName() + ",\n\n"
+                        + "Terima kasih telah bergabung dengan CornCine. Akun Anda berhasil didaftarkan.\n"
+                        + "Gunakan kode promo CORNCINE25 untuk mendapatkan diskon 25% (maks. Rp 25.000) pada pemesanan pertama Anda!\n\n"
+                        + "Selamat menonton,\nTim CornCine");
+                mailSender.send(message);
+            } catch (Exception e) {
+                log.error("Gagal mengirim email welcome ke {}: {}", user.getEmail(), e.getMessage());
+            }
+        }
     }
 
     @Override

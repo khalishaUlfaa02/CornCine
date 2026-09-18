@@ -26,6 +26,7 @@ public class MovieController {
     @GetMapping
     public ResponseEntity<Message> getAllMovies(
             @RequestParam(required = false) String search,
+            @RequestParam(required = false) String genre,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "8") int size,
             @RequestParam(defaultValue = "movieId") String sortBy,
@@ -33,7 +34,7 @@ public class MovieController {
 
         Sort sort = direction.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
         Pageable pageable = PageRequest.of(page, size, sort);
-        Page<MovieRes> result = movieService.getAllMovies(search, pageable);
+        Page<MovieRes> result = movieService.getAllMovies(search, genre, pageable);
 
         return new ResponseEntity<>(Message.success("Katalog film berhasil dimuat", result), HttpStatus.OK);
     }

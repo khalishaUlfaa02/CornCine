@@ -41,17 +41,33 @@ public class ExcelImportServiceImpl implements ExcelImportService {
                     continue;
                 }
 
-                // Kolom 0: Judul, Kolom 1: Sinopsis, Kolom 2: Durasi, Kolom 3: Age Rating
-                String title = currentRow.getCell(0).getStringCellValue();
-                String synopsis = currentRow.getCell(1) != null ? currentRow.getCell(1).getStringCellValue() : "";
-                int duration = (int) currentRow.getCell(2).getNumericCellValue();
-                String ageRating = currentRow.getCell(3) != null ? currentRow.getCell(3).getStringCellValue() : "13+";
+                // Format mengikuti hasil EXPORT: [ID, Judul, Durasi, Age Rating, Release Date, Genre]
+                // Kolom 0: ID Film (diabaikan untuk insert baru)
+                String title = getStringValue(currentRow.getCell(1));
+                if (title == null || title.isBlank()) continue;
+
+                int duration = (int) getNumericValue(currentRow.getCell(2));
+                if (duration <= 0) duration = 120;
+
+                String ageRating = getStringValue(currentRow.getCell(3));
+                if (ageRating == null || ageRating.isBlank() || "-".equals(ageRating)) ageRating = "13+";
+
+                String releaseDateStr = getStringValue(currentRow.getCell(4));
+                java.time.LocalDate releaseDate = null;
+                if (releaseDateStr != null && !"-".equals(releaseDateStr) && !releaseDateStr.isBlank()) {
+                    try {
+                        releaseDate = java.time.LocalDate.parse(releaseDateStr);
+                    } catch (Exception ignored) {}
+                }
+
+                String genreStr = getStringValue(currentRow.getCell(5));
 
                 MovieEntity movie = MovieEntity.builder()
                         .title(title)
-                        .synopsis(synopsis)
+                        .synopsis("Diimpor dari Excel pada " + java.time.LocalDate.now())
                         .durationMinutes(duration)
                         .ageRating(ageRating)
+                        .releaseDate(releaseDate)
                         .genres(new HashSet<>())
                         .deleted(false)
                         .build();
@@ -63,5 +79,38 @@ public class ExcelImportServiceImpl implements ExcelImportService {
         } catch (Exception e) {
             throw new RuntimeException("Gagal mengimpor data dari file Excel: " + e.getMessage());
         }
+    }
+
+    private String getStringValue(Cell cell) {
+        if (cell == null) return null;
+        try {
+            if (cell.getCellType() == CellType.STRING) {
+                return cell.getStringCellValue().trim();
+            } else if (cell.getCellType() == CellType.NUMERIC) {
+                if (org.apache.poi.ss.usermodel.DateUtil.isCellDateFormatted(cell)) {
+                    return cell.getLocalDateTimeCellValue().toLocalDate().toString();
+                }
+                double val = cell.getNumericCellValue();
+                if (val == Math.floor(val)) {
+                    return String.valueOf((int) val);
+                }
+                return String.valueOf(val);
+            } else if (cell.getCellType() == CellType.BOOLEAN) {
+                return String.valueOf(cell.getBooleanCellValue());
+            }
+        } catch (Exception ignored) {}
+        return null;
+    }
+
+    private double getNumericValue(Cell cell) {
+        if (cell == null) return 0;
+        try {
+            if (cell.getCellType() == CellType.NUMERIC) {
+                return cell.getNumericCellValue();
+            } else if (cell.getCellType() == CellType.STRING) {
+                return Double.parseDouble(cell.getStringCellValue().trim());
+            }
+        } catch (Exception ignored) {}
+        return 0;
     }
 }

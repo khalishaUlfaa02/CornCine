@@ -7,4 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface CinemaRepository extends JpaRepository<CinemaEntity, Integer> {
     Page<CinemaEntity> findByDeletedFalse(Pageable pageable);
+
+    boolean existsByNameIgnoreCase(String name);
 }

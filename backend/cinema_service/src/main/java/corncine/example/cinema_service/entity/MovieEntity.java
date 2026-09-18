@@ -40,7 +40,7 @@ public class MovieEntity {
     @Column(name = "synopsis", columnDefinition = "TEXT")
     private String synopsis;
 
-    @Column(name = "duration_minutes", nullable = false)
+    @Column(name = "duration", nullable = false)
     private Integer durationMinutes;
 
     @Column(name = "poster_url", length = 500)

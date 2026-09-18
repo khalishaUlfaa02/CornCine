@@ -34,6 +34,12 @@ public class BookingTransactionEntity {
     @Column(name = "schedule_id")
     private UUID scheduleId;
 
+    // Referensi jadwal dari cinema_service (ID integer, mis. "1").
+    // Kolom UUID di atas tidak bisa menyimpan "1", jadi pakai kolom String terpisah.
+    // Kolom baru aman untuk ddl-auto=update (hanya ADD COLUMN).
+    @Column(name = "schedule_ref")
+    private String scheduleRef;
+
     @Column(name = "order_id", unique = true)
     private String orderId;
 

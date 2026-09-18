@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { createBooking, simulatePayment, cancelBooking } from '../api/ticketApi';
+import { createBooking, simulatePayment, cancelBooking, createPaymentInvoice } from '../api/ticketApi';
 
 const formatPrice = (price) =>
   new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(price);
@@ -22,8 +22,10 @@ const Checkout = () => {
   
   const [initLoading, setInitLoading] = useState(true);
   const [paymentLoading, setPaymentLoading] = useState(false);
+  const [xenditLoading, setXenditLoading] = useState(false);
   const [cancelLoading, setCancelLoading] = useState(false);
   const [error, setError] = useState('');
+  const initiatedRef = useRef(false);
 
   // Data dari halaman SeatSelection
   const { scheduleId, selectedSeats, scheduleDetails, totalAmount } = location.state || {};
@@ -39,13 +41,18 @@ const Checkout = () => {
       return;
     }
 
+    // Guard: React StrictMode (dev) me-mount effect 2x -> cegah double POST booking
+    if (initiatedRef.current) return;
+    initiatedRef.current = true;
+
     const initTransaction = async () => {
       setInitLoading(true);
       setError('');
       try {
         const seatIds = selectedSeats.map((s) => s.seatId);
         const res = await createBooking(scheduleId, seatIds);
-        if (res.success && res.data) {
+        // ticket_service membalas {status, message, data} (tanpa field success)
+        if ((res.success || (typeof res.status === 'number' && res.status >= 200 && res.status < 300)) && res.data) {
           setBookingData(res.data);
         } else {
           setError(res.message || "Gagal membuat transaksi.");
@@ -71,7 +78,7 @@ const Checkout = () => {
 
     try {
       const res = await simulatePayment(bookingData.bookingCode, selectedMethod);
-      if (res.success) {
+      if (res.success || (typeof res.status === 'number' && res.status >= 200 && res.status < 300)) {
         navigate('/my-tickets', { state: { successMsg: "Pembayaran berhasil! Tiketmu sudah terbit." } });
       } else {
         setError(res.message || "Pembayaran gagal.");
@@ -80,6 +87,31 @@ const Checkout = () => {
       setError(err.response?.data?.message || "Terjadi kesalahan saat memproses pembayaran.");
     } finally {
       setPaymentLoading(false);
+    }
+  };
+
+  const handleXenditPayment = async () => {
+    if (!bookingData) return;
+    setXenditLoading(true);
+    setError('');
+
+    try {
+      const res = await createPaymentInvoice({
+        bookingId: bookingData.bookingCode,
+        userEmail: user?.email || '',
+        amount: totalAmount,
+        description: `Tiket ${scheduleDetails?.movieTitle || 'CornCine'} - ${bookingData.bookingCode}`,
+      });
+      const invoiceUrl = res.data?.invoice_url;
+      if ((res.success || (typeof res.status === 'number' && res.status >= 200 && res.status < 300)) && invoiceUrl) {
+        window.location.href = invoiceUrl;
+      } else {
+        setError(res.message || 'Gagal membuat invoice Xendit.');
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'Terjadi kesalahan saat membuat invoice Xendit.');
+    } finally {
+      setXenditLoading(false);
     }
   };
 
@@ -103,7 +135,7 @@ const Checkout = () => {
 
   if (initLoading) {
     return (
-      <div className="min-h-[70vh] flex flex-col items-center justify-center">
+      <div className="min-h-screen pt-28 pb-20 flex flex-col items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-4 border-cine-baby border-t-transparent mb-4"></div>
         <p className="text-cine-muted font-medium animate-pulse">Menyiapkan transaksi Anda...</p>
       </div>
@@ -112,7 +144,7 @@ const Checkout = () => {
 
   if (error && !bookingData) {
     return (
-      <div className="container mx-auto px-4 py-16 text-center max-w-lg">
+      <div className="container mx-auto px-4 pt-28 pb-20 text-center max-w-lg">
         <div className="bg-cine-card border border-rose-500/30 p-8 rounded-2xl shadow-xl">
           <div className="w-16 h-16 bg-rose-500/20 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -133,7 +165,7 @@ const Checkout = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-12">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl pt-28 pb-20">
       <h1 className="text-3xl font-extrabold text-white mb-8 flex items-center">
         Checkout Pembayaran
         <span className="ml-3 h-1 w-12 bg-cine-baby rounded-full inline-block" />
@@ -270,10 +302,22 @@ const Checkout = () => {
               >
                 {paymentLoading ? 'Memproses...' : 'Bayar Sekarang (Simulasi)'}
               </button>
-              
+
+              <button
+                onClick={handleXenditPayment}
+                disabled={paymentLoading || xenditLoading || cancelLoading}
+                className={`w-full font-bold py-3.5 rounded-xl transition-all duration-300 ${
+                  paymentLoading || xenditLoading || cancelLoading
+                    ? 'bg-sky-400/50 text-slate-900 cursor-not-allowed'
+                    : 'bg-sky-400 text-slate-950 hover:bg-sky-300 shadow-[0_0_15px_rgba(56,189,248,0.3)] hover:shadow-[0_0_20px_rgba(56,189,248,0.5)] transform hover:-translate-y-0.5'
+                }`}
+              >
+                {xenditLoading ? 'Membuat Invoice...' : 'Bayar dengan Xendit'}
+              </button>
+
               <button
                 onClick={handleCancel}
-                disabled={paymentLoading || cancelLoading}
+                disabled={paymentLoading || xenditLoading || cancelLoading}
                 className="w-full bg-transparent text-rose-400 font-semibold py-3 rounded-xl border border-rose-500/30 hover:bg-rose-500/10 hover:border-rose-500 transition-all duration-200"
               >
                 {cancelLoading ? 'Membatalkan...' : 'Batalkan Pesanan'}

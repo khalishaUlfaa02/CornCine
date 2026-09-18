@@ -36,6 +36,8 @@ public class DataSeeder implements CommandLineRunner {
             roleRepository.save(RoleEntity.builder().roleName("Customer").roleCode("CUSTOMER").isActive(true).build())
         );
 
+        RoleEntity customerRole = roleRepository.findByRoleCode("CUSTOMER").orElseThrow();
+
         // 2. Inisialisasi Akun Super Admin Default
         if (!userRepository.existsByUsername("admin")) {
             UserEntity adminUser = UserEntity.builder()
@@ -58,5 +60,34 @@ public class DataSeeder implements CommandLineRunner {
             userProfileRepository.save(adminProfile);
             log.info(">>> SEEDER: Akun Admin Default Berhasil Dibuat (admin / password123)");
         }
+
+        // 3. Akun demo untuk pengujian (idempotent)
+        createDemoUserIfMissing("staff1", "staff1@corncine.com", "Staff Satu Bioskop", "081100000001", "STAFF");
+        for (int i = 1; i <= 20; i++) {
+            String username = "user" + String.format("%02d", i);
+            createDemoUserIfMissing(username, username + "@example.com",
+                    "Pengguna Demo " + i, "08120000" + String.format("%04d", i), "CUSTOMER");
+        }
+    }
+
+    private void createDemoUserIfMissing(String username, String email, String fullName,
+                                         String phone, String roleCode) {
+        if (userRepository.existsByUsername(username) || userRepository.existsByEmail(email)) {
+            return;
+        }
+        RoleEntity role = roleRepository.findByRoleCode(roleCode).orElseThrow();
+        UserEntity user = userRepository.save(UserEntity.builder()
+                .username(username)
+                .password(passwordEncoder.encode("password123"))
+                .email(email)
+                .role(role)
+                .status("ACTIVE")
+                .deleted(false)
+                .build());
+        userProfileRepository.save(UserProfileEntity.builder()
+                .user(user)
+                .fullName(fullName)
+                .phoneNumber(phone)
+                .build());
     }
 }

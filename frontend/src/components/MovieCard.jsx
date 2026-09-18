@@ -1,12 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
 
 const FALLBACK_POSTER = 'https://placehold.co/300x450/162238/7DD3FC?text=No+Poster';
 
 const MovieCard = ({ movie }) => {
+  const { user } = useContext(AuthContext);
   const [imgError, setImgError] = useState(false);
 
   const posterSrc = (!movie.posterUrl || imgError) ? FALLBACK_POSTER : movie.posterUrl;
+  const isAdmin = user && (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN' || user.role === 'STAFF');
 
   return (
     <div className="bg-cine-card rounded-2xl overflow-hidden border border-cine-border group hover:border-cine-baby/40 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg hover:shadow-cine-baby/5 flex flex-col">
@@ -51,12 +54,12 @@ const MovieCard = ({ movie }) => {
           {movie.durationMinutes} mnt
         </p>
 
-        {/* CTA Button */}
+        {/* CTA Button - label beda untuk admin vs user/tamu */}
         <Link
           to={`/movies/${movie.movieId}`}
           className="block w-full text-center bg-cine-baby text-cine-dark font-semibold py-2.5 rounded-xl hover:bg-cine-baby-hover shadow-[0_0_10px_rgba(125,211,252,0.15)] hover:shadow-[0_0_18px_rgba(56,189,248,0.35)] transition-all duration-300"
         >
-          Beli Tiket
+          {isAdmin ? 'Lihat Pratinjau' : 'Beli Tiket'}
         </Link>
       </div>
     </div>

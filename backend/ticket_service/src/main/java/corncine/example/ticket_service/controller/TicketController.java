@@ -11,6 +11,9 @@ import corncine.example.ticket_service.service.TicketService;
 import corncine.example.ticket_service.utility.Message;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import corncine.example.ticket_service.payload.req.ValidateTicketReq;
+import corncine.example.ticket_service.payload.res.ValidateTicketRes;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -19,7 +22,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/tickets")
@@ -30,9 +32,9 @@ public class TicketController {
     private final TicketPdfService ticketPdfService;
 
     @GetMapping("/schedules/{scheduleId}/occupied-seats")
-    public ResponseEntity<Message<List<UUID>>> getOccupiedSeats(@PathVariable UUID scheduleId) {
-        List<UUID> occupiedSeats = ticketService.getOccupiedSeats(scheduleId);
-        return ResponseEntity.ok(Message.<List<UUID>>builder()
+    public ResponseEntity<Message<List<String>>> getOccupiedSeats(@PathVariable String scheduleId) {
+        List<String> occupiedSeats = ticketService.getOccupiedSeats(scheduleId);
+        return ResponseEntity.ok(Message.<List<String>>builder()
                 .status(HttpStatus.OK.value())
                 .message("Occupied seats fetched successfully")
                 .data(occupiedSeats)
@@ -95,6 +97,17 @@ public class TicketController {
                 .status(HttpStatus.OK.value())
                 .message("Pemesanan berhasil dibatalkan")
                 .data(null)
+                .build());
+    }
+
+    @PostMapping("/validate")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN', 'STAFF')")
+    public ResponseEntity<Message<ValidateTicketRes>> validateTicket(@Valid @RequestBody ValidateTicketReq req) {
+        ValidateTicketRes res = ticketService.validateTicket(req);
+        return ResponseEntity.ok(Message.<ValidateTicketRes>builder()
+                .status(HttpStatus.OK.value())
+                .message("TIKET VALID - SILAKAN MASUK")
+                .data(res)
                 .build());
     }
 }

@@ -48,7 +48,10 @@ const Register = () => {
         setError(response.message || 'Registrasi gagal');
       }
     } catch (err) {
-      if (err.response?.data?.errors) {
+      console.error("Register Error Detail:", err.message, err.response);
+      if (err.code === 'ERR_NETWORK') {
+        setError('Gagal terhubung ke server backend. Pastikan service auth menyala.');
+      } else if (err.response?.data?.errors) {
         // Validation errors from Spring Boot @Valid
         const errorMessages = Object.values(err.response.data.errors).join(', ');
         setError(errorMessages);
@@ -63,7 +66,7 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen pt-32 pb-16 flex items-center justify-center px-4 relative z-10">
       <div className="bg-cine-card p-10 rounded-2xl shadow-2xl w-full max-w-md border border-cine-border relative overflow-hidden">
         {/* Glow effect in background */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 bg-cine-baby rounded-b-full shadow-[0_0_20px_rgba(125,211,252,0.8)]"></div>
@@ -91,7 +94,7 @@ const Register = () => {
               name="username"
               value={formData.username}
               onChange={handleChange}
-              className="w-full p-3.5 rounded-xl bg-cine-dark border border-cine-border text-white focus:outline-none focus:border-cine-baby focus:ring-1 focus:ring-cine-baby/50 transition-all" 
+              className="w-full bg-slate-900/80 border border-slate-700 text-slate-100 placeholder-slate-500 px-4 py-3 rounded-xl focus:border-sky-400 focus:ring-1 focus:ring-sky-400 focus:outline-none transition-colors" 
               placeholder="Min. 4 karakter"
             />
           </div>
@@ -102,7 +105,7 @@ const Register = () => {
               name="fullName"
               value={formData.fullName}
               onChange={handleChange}
-              className="w-full p-3.5 rounded-xl bg-cine-dark border border-cine-border text-white focus:outline-none focus:border-cine-baby focus:ring-1 focus:ring-cine-baby/50 transition-all" 
+              className="w-full bg-slate-900/80 border border-slate-700 text-slate-100 placeholder-slate-500 px-4 py-3 rounded-xl focus:border-sky-400 focus:ring-1 focus:ring-sky-400 focus:outline-none transition-colors" 
               placeholder="Nama Lengkap Anda"
             />
           </div>
@@ -113,7 +116,7 @@ const Register = () => {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className="w-full p-3.5 rounded-xl bg-cine-dark border border-cine-border text-white focus:outline-none focus:border-cine-baby focus:ring-1 focus:ring-cine-baby/50 transition-all" 
+              className="w-full bg-slate-900/80 border border-slate-700 text-slate-100 placeholder-slate-500 px-4 py-3 rounded-xl focus:border-sky-400 focus:ring-1 focus:ring-sky-400 focus:outline-none transition-colors" 
               placeholder="contoh@email.com"
             />
           </div>
@@ -124,7 +127,7 @@ const Register = () => {
               name="password"
               value={formData.password}
               onChange={handleChange}
-              className="w-full p-3.5 rounded-xl bg-cine-dark border border-cine-border text-white focus:outline-none focus:border-cine-baby focus:ring-1 focus:ring-cine-baby/50 transition-all" 
+              className="w-full bg-slate-900/80 border border-slate-700 text-slate-100 placeholder-slate-500 px-4 py-3 rounded-xl focus:border-sky-400 focus:ring-1 focus:ring-sky-400 focus:outline-none transition-colors" 
               placeholder="Min. 6 karakter"
             />
           </div>

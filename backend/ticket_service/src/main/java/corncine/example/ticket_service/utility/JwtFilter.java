@@ -23,21 +23,27 @@ public class JwtFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String authHeader = request.getHeader("Authorization");
         String token = null;
-        String userId = null;
+        String username = null; // Tadi disini "userId", padahal JWT menyimpan username sebagai subject
+        String role = null;
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             token = authHeader.substring(7);
             try {
                 if (jwtUtil.validateToken(token)) {
-                    userId = jwtUtil.extractUserId(token);
+                    username = jwtUtil.extractUserId(token);
+                    role = jwtUtil.extractAllClaims(token).get("role", String.class);
                 }
-            } catch (Exception ignored) {
+            } catch (Exception e) {
+                System.err.println("JwtFilter Error di ticket_service: " + e.getMessage());
             }
         }
 
-        if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            java.util.List<org.springframework.security.core.authority.SimpleGrantedAuthority> authorities = 
+                java.util.Collections.singletonList(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_" + role));
+                
             UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                    userId, null, Collections.emptyList()
+                    username, null, authorities
             );
             SecurityContextHolder.getContext().setAuthentication(authToken);
         }

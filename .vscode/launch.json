@@ -19,6 +19,46 @@
           "ignoreFailures": true
         }
       ]
+    },
+    {
+      "type": "java",
+      "name": "Spring Boot-GatewayServiceApplication<api_gateway>",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "mainClass": "corncine.example.gateway_service.GatewayServiceApplication",
+      "projectName": "api_gateway",
+      "args": "",
+      "envFile": "${workspaceFolder}/.env"
+    },
+    {
+      "type": "java",
+      "name": "Spring Boot-AuthServiceApplication<auth_service>",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "mainClass": "corncine.example.auth_service.AuthServiceApplication",
+      "projectName": "auth_service",
+      "args": "",
+      "envFile": "${workspaceFolder}/.env"
+    },
+    {
+      "type": "java",
+      "name": "Spring Boot-CinemaServiceApplication<cinema_service>",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "mainClass": "corncine.example.cinema_service.CinemaServiceApplication",
+      "projectName": "cinema_service",
+      "args": "",
+      "envFile": "${workspaceFolder}/.env"
+    },
+    {
+      "type": "java",
+      "name": "Spring Boot-TicketServiceApplication<ticket_service>",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "mainClass": "corncine.example.ticket_service.TicketServiceApplication",
+      "projectName": "ticket_service",
+      "args": "",
+      "envFile": "${workspaceFolder}/.env"
     }
   ]
 }
