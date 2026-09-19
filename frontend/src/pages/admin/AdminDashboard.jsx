@@ -9,26 +9,29 @@ import { getAllUsers } from '../../api/authApi';
 const unwrapList = (res) =>
   res?.data?.content || res?.data?.data || (Array.isArray(res?.data) ? res.data : []);
 
-const StatCard = ({ label, value, sub, to }) => (
-  <Link
-    to={to}
-    className="bg-cine-card rounded-2xl p-6 border border-cine-border shadow-lg hover:border-cine-baby/50 transition-all group"
-  >
-    <p className="text-cine-muted text-xs font-bold uppercase tracking-wider mb-2">{label}</p>
-    <p className="text-4xl font-black text-white group-hover:text-cine-baby transition-colors">{value}</p>
-    {sub && <p className="text-cine-muted text-xs mt-2">{sub}</p>}
-  </Link>
-);
+const StatCard = ({ label, value, sub, to }) => {
+  const content = (
+    <div className="bg-cine-card rounded-2xl p-6 border border-cine-border shadow-lg hover:border-cine-baby/50 transition-all group h-full">
+      <p className="text-cine-muted text-xs font-bold uppercase tracking-wider mb-2">{label}</p>
+      <p className="text-4xl font-black text-white group-hover:text-cine-baby transition-colors">{value}</p>
+      {sub && <p className="text-cine-muted text-xs mt-2">{sub}</p>}
+    </div>
+  );
+
+  return to ? <Link to={to}>{content}</Link> : <div>{content}</div>;
+};
 
 const AdminDashboard = () => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({ movies: 0, cinemas: 0, schedules: 0, users: 0 });
+  const [stats, setStats] = useState({ movies: 0, cinemas: 0, schedules: 0, users: '-' });
   const [recentSchedules, setRecentSchedules] = useState([]);
   const [recentMovies, setRecentMovies] = useState([]);
   const [error, setError] = useState('');
+
+  const isSuperAdmin = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN';
 
   useEffect(() => {
     if (!user || (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN' && user.role !== 'STAFF')) {
@@ -39,17 +42,34 @@ const AdminDashboard = () => {
     const fetchAll = async () => {
       setLoading(true);
       try {
-        const [moviesRes, schedRes, cinemaRes, usersRes] = await Promise.all([
+        const promises = [
           getMovies(0, 100),
           getAllSchedules(0, 100),
           getCinemas(),
-          getAllUsers(0, 1),
-        ]);
+        ];
 
-        const movies = unwrapList(moviesRes);
-        const schedules = unwrapList(schedRes);
-        const cinemas = unwrapList(cinemaRes);
-        const totalUsers = usersRes?.data?.totalElements ?? unwrapList(usersRes).length;
+        if (isSuperAdmin) {
+          promises.push(getAllUsers(0, 1));
+        } else {
+          // Dummy resolved promise for STAFF to maintain index
+          promises.push(Promise.resolve(null));
+        }
+
+        const results = await Promise.allSettled(promises);
+
+        const moviesRes = results[0].status === 'fulfilled' ? results[0].value : null;
+        const schedRes = results[1].status === 'fulfilled' ? results[1].value : null;
+        const cinemaRes = results[2].status === 'fulfilled' ? results[2].value : null;
+        const usersRes = results[3].status === 'fulfilled' ? results[3].value : null;
+
+        const movies = moviesRes ? unwrapList(moviesRes) : [];
+        const schedules = schedRes ? unwrapList(schedRes) : [];
+        const cinemas = cinemaRes ? unwrapList(cinemaRes) : [];
+        
+        let totalUsers = '-';
+        if (isSuperAdmin && usersRes) {
+          totalUsers = usersRes.data?.totalElements ?? unwrapList(usersRes).length;
+        }
 
         setStats({
           movies: moviesRes?.data?.totalElements ?? movies.length,
@@ -57,18 +77,25 @@ const AdminDashboard = () => {
           schedules: schedules.length,
           users: totalUsers,
         });
+
         setRecentSchedules(schedules.slice(0, 5));
         setRecentMovies(movies.slice(0, 4));
+
+        // Check if critical data failed
+        if (results[0].status === 'rejected' || results[1].status === 'rejected') {
+          console.error("Sebagian data gagal dimuat", results);
+          setError("Beberapa data mungkin tidak tampil karena gangguan pada server.");
+        }
       } catch (err) {
         console.error(err);
-        setError(err.response?.data?.message || 'Gagal memuat data dashboard. Pastikan semua service menyala.');
+        setError("Gagal memuat data dashboard secara fatal.");
       } finally {
         setLoading(false);
       }
     };
 
     fetchAll();
-  }, [user, navigate]);
+  }, [user, navigate, isSuperAdmin]);
 
   if (loading) {
     return (
@@ -93,16 +120,23 @@ const AdminDashboard = () => {
         </div>
 
         {error && (
-          <div className="bg-rose-500/10 border border-rose-500/30 text-rose-400 p-4 rounded-xl text-sm font-medium mb-8">
+          <div className="bg-amber-500/10 border border-amber-500/30 text-amber-400 p-4 rounded-xl text-sm font-medium mb-8">
             {error}
           </div>
         )}
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+        <div className={`grid gap-4 mb-10 ${isSuperAdmin ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4' : 'grid-cols-1 md:grid-cols-3'}`}>
           <StatCard label="Total Film" value={stats.movies} sub="Katalog aktif" to="/admin/movies" />
-          <StatCard label="Total Bioskop" value={stats.cinemas} sub="Cabang terdaftar" to="/admin/cinemas" />
+          <StatCard label="Total Bioskop" value={stats.cinemas} sub="Cabang terdaftar" to={isSuperAdmin ? "/admin/cinemas" : null} />
           <StatCard label="Total Jadwal" value={stats.schedules} sub="Slot tayang" to="/admin/schedules" />
-          <StatCard label="Total Pengguna" value={stats.users} sub="Akun terdaftar" to="/admin/users" />
+          {isSuperAdmin && (
+            <StatCard 
+              label="Total Pengguna" 
+              value={stats.users} 
+              sub="Akun terdaftar" 
+              to="/admin/users" 
+            />
+          )}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
